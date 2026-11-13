@@ -1,6 +1,6 @@
 # camclear-lab
 
-**Camera-path smoothing that can prove it misses the walls:** a fully smoothed Catmull-Rom/box-blur path drives through obstacles on all 6 sample scenes (sampled clearance **0.0000**, certified bound **−0.0094…−0.0060**), while the same core returns a *spatially adaptive* blend whose **certified lower bound is 0.1225–0.1391 ≥ 0.12** target, with **0.685–0.768 mean smoothing retained** versus **0.181–0.449** for a single global blend — a 1.6×–3.9× improvement at identical certified clearance. Every path number in this README is produced by `node bench/verify.mjs` and `node bench/bench.mjs`.
+**Camera-path smoothing that can prove it misses the walls:** a fully smoothed Catmull-Rom/box-blur path drives through obstacles on all 6 sample scenes (sampled clearance **0.0000**, certified bound **−0.0094…−0.0060**), while the same core returns a *spatially adaptive* blend whose **certified lower bound is 0.1225–0.1391 ≥ 0.12** target, with **0.685–0.768 mean smoothing retained** versus **0.181–0.449** for a single global blend — a 1.67×–3.98× improvement at identical certified clearance. Every path number in this README is produced by `node bench/verify.mjs` and `node bench/bench.mjs`.
 
 Upstream: none
 
