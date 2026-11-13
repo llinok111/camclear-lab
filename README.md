@@ -1,6 +1,6 @@
 # camclear-lab
 
-**Camera-path smoothing that can prove it misses the walls:** a fully smoothed (box-blurred) path drives through obstacles on all 6 sample scenes (sampled clearance **0.0000**, certified bound **−0.0094…−0.0060**), while the same core returns a *spatially adaptive* blend whose **certified lower bound is 0.1225–0.1391 ≥ 0.12** target, with **0.685–0.768 mean smoothing retained** versus **0.181–0.449** for a single global blend — a 1.67×–3.98× improvement at identical certified clearance. Every path number in this README is produced by `node bench/verify.mjs` and `node bench/bench.mjs`.
+**Camera-path smoothing that can prove it misses the walls:** a fully smoothed (box-blurred) path drives through obstacles on all 6 sample scenes (sampled clearance **0.0000**, certified bound **−0.0094…−0.0060**), while the same core returns a *spatially adaptive* blend whose **certified lower bound is 0.1225–0.1391 ≥ 0.12** target, with **0.685–0.768 mean smoothing retained** versus **0.181–0.455** for a single global blend — a 1.67×–3.98× improvement at identical certified clearance. Every path number in this README is produced by `node bench/verify.mjs` and `node bench/bench.mjs`.
 
 Upstream: none
 
@@ -8,7 +8,7 @@ Upstream: none
 
 You give it waypoints for a camera fly-through and a closed triangle mesh (the sample scenes use box obstacles). It certifies the distance from the path to the mesh — **for the continuous path, not just for samples** — and repairs the path by locally reducing how much smoothing is applied, so the camera still rounds corners where there is room and tightens where there is not.
 
-The certificate is a real lower bound: distance-to-mesh is 1-Lipschitz, so for a segment `AB` of length `L` with midpoint `M`, every point `q` on the segment satisfies `d(q) ≥ min(d(A), d(M), d(B)) − L/4`. Summing over densely sampled segments gives a bound for the whole path. `bench/verify.mjs` re-checks every certificate against an independently written triangle-distance routine and a 12× denser path sampling (gaps 0.0093–0.0123).
+The certificate is a real lower bound: distance-to-mesh is 1-Lipschitz, so for a segment `AB` of length `L` with midpoint `M`, every point `q` on the segment satisfies `d(q) ≥ min(d(A), d(M), d(B)) − L/4`. Summing over densely sampled segments gives a bound for the whole path. `bench/verify.mjs` re-checks every certificate against an independently written triangle-distance routine and a 12× denser path sampling (gaps 0.0057–0.0122).
 
 ## Run it
 
@@ -34,11 +34,11 @@ Naive path = full smoothing, α = 1, no check. Adaptive = per-sample α field.
 | corner-b | 120 | 0.0000 | 0.1291 | 0.713 | 0.181 | 52.1% |
 | corner-c | 144 | 0.0000 | 0.1369 | 0.735 | 0.201 | 54.7% |
 
-- Independent dense oracle on the planned path: 0.1298–0.1485; certificate gap 0.0093–0.0123; **sound** (bound never above the oracle) on all 6 scenes and on 12 random paths.
+- Independent dense oracle on the planned path: 0.1298–0.1485; certificate gap 0.0057–0.0122; **sound** (bound never above the oracle) on all 6 scenes and on 12 random paths.
 - Scale invariance 1e-6×…1e6×: **30/30** decisions and cert/target ratios unchanged (relative tolerances only; see limitations).
 - Point-triangle distance vs an independently written projection/edge-clamp oracle: 300 random cases, max |Δ| = **8.88e-16**.
 - Inside-mesh ray parity vs analytic box containment: **240/240**.
-- Planning time (7 samples per scene after warmup): per-scene medians **103–210 ms** for the adaptive planner, **79–134 ms** for the uniform planner, cold start **215.3 ms**; pooled median 168.8 ms with **RSD 21.5%** because samples span six different scenes (per-scene RSD ≤ **2.5%**). Certifying one already-built naive path costs **6.8 ms** median. Clearance queries: **85.7k/s**.
+- Planning time (7 samples per scene after warmup): per-scene medians **107.4–220.2 ms** for the adaptive planner and **82.2–141.5 ms** for the uniform planner; cold start **227.1 ms**, pooled median **178.0 ms** with **RSD 21.4%** because samples span six different scenes (per-scene RSD **2.01%** max in the committed run; an independent rerun measured 2.66%, showing machine-level noise). Certifying one already-built naive path costs **7.2 ms** median. Clearance queries: **80.8k/s**.
 - Generator is byte-deterministic: `node tools/gen-sample.mjs` twice gives the same `sceneHash=3643db3d`.
 
 ## 本轮创新
