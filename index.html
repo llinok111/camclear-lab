@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>camclear-lab — certified camera path smoothing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0b0f14; color: #dbe4ee; font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  #app { position: fixed; inset: 0; }
+  #panel {
+    position: fixed; top: 12px; left: 12px; width: 330px; padding: 12px 14px;
+    background: rgba(12, 18, 26, .88); border: 1px solid #22303f; border-radius: 8px;
+    backdrop-filter: blur(6px);
+  }
+  h1 { font-size: 14px; margin: 0 0 2px; letter-spacing: .02em; }
+  .sub { color: #7f93a8; font-size: 11px; margin-bottom: 10px; }
+  .row { display: flex; justify-content: space-between; gap: 8px; margin: 3px 0; }
+  .k { color: #8ba0b6; }
+  .v { color: #e8f1fa; }
+  .good { color: #5ee0a0; }
+  .bad { color: #ff7a7a; }
+  .warn { color: #ffcf6e; }
+  #scenes { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0 10px; }
+  button {
+    background: #16202b; color: #b9c9d8; border: 1px solid #2a3a4b; border-radius: 5px;
+    padding: 4px 7px; font: inherit; font-size: 11px; cursor: pointer;
+  }
+  button.on { border-color: #4aa8ff; color: #eaf4ff; background: #1b2c3d; }
+  input[type=range] { width: 100%; accent-color: #4aa8ff; }
+  .bar { height: 4px; background: #223040; border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .bar > i { display: block; height: 100%; background: linear-gradient(90deg, #ff6b6b, #5ee0a0); }
+  hr { border: 0; border-top: 1px solid #1d2a38; margin: 9px 0; }
+  #note { color: #6f8399; font-size: 11px; margin-top: 8px; }
+  #legend { position: fixed; right: 14px; bottom: 12px; color: #8ba0b6; font-size: 11px; text-align: right; }
+  .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin: 0 4px 0 8px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="panel">
+  <h1>camclear-lab</h1>
+  <div class="sub">certified camera-path smoothing · node core, live in browser</div>
+  <div id="scenes"></div>
+  <label class="k">clearance target <span id="tv" class="v"></span></label>
+  <input id="target" type="range" min="0.06" max="0.24" step="0.01" value="0.12" />
+  <hr />
+  <div class="row"><span class="k">naive smoothing</span><span id="naive" class="v"></span></div>
+  <div class="row"><span class="k">certified bound</span><span id="cert" class="v"></span></div>
+  <div class="row"><span class="k">independent oracle</span><span id="oracle" class="v"></span></div>
+  <div class="row"><span class="k">mean α (adaptive)</span><span id="alpha" class="v"></span></div>
+  <div class="row"><span class="k">uniform α baseline</span><span id="ualpha" class="v"></span></div>
+  <div class="bar"><i id="abar" style="width:0%"></i></div>
+  <div class="row"><span class="k">plan time</span><span id="ms" class="v"></span></div>
+  <div class="row"><span class="k">node reference</span><span id="node" class="v"></span></div>
+  <div id="note">Dashed red: fully smoothed path (unchecked). Green tube: the path this tool certifies. Drag to orbit.</div>
+</div>
+<div id="legend">
+  <span class="sw" style="background:#ff5f5f"></span>naive
+  <span class="sw" style="background:#5ee0a0"></span>certified
+  <span class="sw" style="background:#5b6b7c"></span>raw waypoints
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

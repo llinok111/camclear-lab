@@ -1,0 +1,99 @@
+{
+ "tool": "camclear-lab",
+ "target": 0.12,
+ "samplesPerConfig": 7,
+ "coldMs": 227.13069599999994,
+ "aggregate": {
+  "adaptive": {
+   "median": 178.01113949999944,
+   "p95": 221.04474400000026,
+   "min": 106.73013799999899,
+   "max": 231.80676700000004,
+   "mean": 176.59633804761904,
+   "stddev": 37.849763233457125,
+   "rsdPct": 21.432926442252143
+  },
+  "uniform": {
+   "median": 120.23794300000031,
+   "p95": 141.5808079999988,
+   "min": 82.05915500000083,
+   "max": 145.49539699999968,
+   "mean": 115.54636840476203,
+   "stddev": 18.977992011272246,
+   "rsdPct": 16.424568139425922
+  },
+  "naivePathCertifyMs": {
+   "median": 7.177544000000239,
+   "p95": 8.635393999999906,
+   "min": 4.772972999999183,
+   "max": 8.719492999999602,
+   "mean": 6.958298619047647,
+   "stddev": 1.2027909771098846,
+   "rsdPct": 17.285705069014494
+  }
+ },
+ "perScene": [
+  {
+   "name": "slalom-a",
+   "tris": 96,
+   "adaptiveMs": 220.2270980000003,
+   "adaptiveRsdPct": 2.012149762005905,
+   "uniformMs": 113.55553899999995,
+   "uniformRsdPct": 1.4579612079962188,
+   "naiveCertifyMs": 6.91942999999992
+  },
+  {
+   "name": "slalom-b",
+   "tris": 108,
+   "adaptiveMs": 178.889279,
+   "adaptiveRsdPct": 1.1393662266960358,
+   "uniformMs": 127.82403400000021,
+   "uniformRsdPct": 0.6175510888222782,
+   "naiveCertifyMs": 7.7796059999991485
+  },
+  {
+   "name": "slalom-c",
+   "tris": 120,
+   "adaptiveMs": 213.32821599999988,
+   "adaptiveRsdPct": 0.8833171601506373,
+   "uniformMs": 141.45027299999947,
+   "uniformRsdPct": 1.207417485198117,
+   "naiveCertifyMs": 8.604357000000164
+  },
+  {
+   "name": "corner-a",
+   "tris": 96,
+   "adaptiveMs": 107.3647009999986,
+   "adaptiveRsdPct": 0.3586858933639415,
+   "uniformMs": 82.21339500000067,
+   "uniformRsdPct": 0.5405277996278336,
+   "naiveCertifyMs": 4.80257999999958
+  },
+  {
+   "name": "corner-b",
+   "tris": 120,
+   "adaptiveMs": 159.11598500000036,
+   "adaptiveRsdPct": 0.7227590982732347,
+   "uniformMs": 103.14172000000144,
+   "uniformRsdPct": 0.8761518739443842,
+   "naiveCertifyMs": 6.186921000000439
+  },
+  {
+   "name": "corner-c",
+   "tris": 144,
+   "adaptiveMs": 176.01343199999974,
+   "adaptiveRsdPct": 0.5538704430401431,
+   "uniformMs": 123.84771900000123,
+   "uniformRsdPct": 0.4032403859174708,
+   "naiveCertifyMs": 7.341221000000587
+  }
+ ],
+ "maxPerSceneAdaptiveRsdPct": 2.012149762005905,
+ "clearanceQuery": {
+  "queries": 30000,
+  "ms": 371.1645559999997,
+  "qps": 80826.68324612339,
+  "sink": 46306.68792368857
+ },
+ "note": "Times are wall-clock from node v24.19.0 on 4 vCPU; medians over 7 runs per scene after one warmup."
+}
