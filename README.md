@@ -1,6 +1,6 @@
 # camclear-lab
 
-**Camera-path smoothing that can prove it misses the walls:** a fully smoothed Catmull-Rom/box-blur path drives through obstacles on all 6 sample scenes (sampled clearance **0.0000**, certified bound **−0.0094…−0.0060**), while the same core returns a *spatially adaptive* blend whose **certified lower bound is 0.1225–0.1391 ≥ 0.12** target, with **0.685–0.768 mean smoothing retained** versus **0.181–0.449** for a single global blend — a 1.67×–3.98× improvement at identical certified clearance. Every path number in this README is produced by `node bench/verify.mjs` and `node bench/bench.mjs`.
+**Camera-path smoothing that can prove it misses the walls:** a fully smoothed (box-blurred) path drives through obstacles on all 6 sample scenes (sampled clearance **0.0000**, certified bound **−0.0094…−0.0060**), while the same core returns a *spatially adaptive* blend whose **certified lower bound is 0.1225–0.1391 ≥ 0.12** target, with **0.685–0.768 mean smoothing retained** versus **0.181–0.449** for a single global blend — a 1.67×–3.98× improvement at identical certified clearance. Every path number in this README is produced by `node bench/verify.mjs` and `node bench/bench.mjs`.
 
 Upstream: none
 
@@ -25,14 +25,14 @@ The browser page uses the same `src/core.mjs` as node and shows the node referen
 
 Naive path = full smoothing, α = 1, no check. Adaptive = per-sample α field.
 
-| scene | tris | naive sampled min | adaptive certified | adaptive mean α | uniform α |
-| --- | --- | --- | --- | --- | --- |
-| slalom-a | 96 | 0.0000 | 0.1225 | 0.685 | 0.313 |
-| slalom-b | 108 | 0.0000 | 0.1242 | 0.759 | 0.455 |
-| slalom-c | 120 | 0.0000 | 0.1263 | 0.754 | 0.449 |
-| corner-a | 96 | 0.0000 | 0.1391 | 0.768 | 0.193 |
-| corner-b | 120 | 0.0000 | 0.1291 | 0.713 | 0.181 |
-| corner-c | 144 | 0.0000 | 0.1369 | 0.735 | 0.201 |
+| scene | tris | naive sampled min | adaptive certified | adaptive mean α | uniform α | path share α>0.9 |
+| --- | --- | --- | --- | --- | --- | --- |
+| slalom-a | 96 | 0.0000 | 0.1225 | 0.685 | 0.313 | 38.3% |
+| slalom-b | 108 | 0.0000 | 0.1242 | 0.759 | 0.455 | 44.1% |
+| slalom-c | 120 | 0.0000 | 0.1263 | 0.754 | 0.449 | 50.0% |
+| corner-a | 96 | 0.0000 | 0.1391 | 0.768 | 0.193 | 60.4% |
+| corner-b | 120 | 0.0000 | 0.1291 | 0.713 | 0.181 | 52.1% |
+| corner-c | 144 | 0.0000 | 0.1369 | 0.735 | 0.201 | 54.7% |
 
 - Independent dense oracle on the planned path: 0.1298–0.1485; certificate gap 0.0093–0.0123; **sound** (bound never above the oracle) on all 6 scenes and on 12 random paths.
 - Scale invariance 1e-6×…1e6×: **30/30** decisions and cert/target ratios unchanged (relative tolerances only; see limitations).
