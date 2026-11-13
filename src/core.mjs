@@ -121,75 +121,6 @@ export function clearanceAt(p, mesh) {
   return { d: q.d, point: q.point, inside: false, push: vnorm(vsub(p, q.point)), surfaceDist: q.d, tri: q.tri };
 }
 
-// --- Catmull-Rom -----------------------------------------------------------
-// Uniform Catmull-Rom with reflected phantom endpoints.
-export function buildExt(waypoints) {
-  if (waypoints.length < 2) throw new Error('need at least 2 waypoints');
-  const p = waypoints.map((q) => [q[0], q[1], q[2]]);
-  const first = vsub(vscale(p[0], 2), p[1]);
-  const last = vsub(vscale(p[p.length - 1], 2), p[p.length - 2]);
-  return [first, ...p, last];
-}
-
-export function spanCount(ext) { return ext.length - 3; }
-
-export function spanPoint(ext, i, u) {
-  const p0 = ext[i], p1 = ext[i + 1], p2 = ext[i + 2], p3 = ext[i + 3];
-  const u2 = u * u, u3 = u2 * u;
-  const f0 = -0.5 * u3 + u2 - 0.5 * u;
-  const f1 = 1.5 * u3 - 2.5 * u2 + 1;
-  const f2 = -1.5 * u3 + 2 * u2 + 0.5 * u;
-  const f3 = 0.5 * u3 - 0.5 * u2;
-  return [
-    p0[0] * f0 + p1[0] * f1 + p2[0] * f2 + p3[0] * f3,
-    p0[1] * f0 + p1[1] * f1 + p2[1] * f2 + p3[1] * f3,
-    p0[2] * f0 + p1[2] * f1 + p2[2] * f2 + p3[2] * f3,
-  ];
-}
-
-// Max |P'(u)| over the span, via the convex hull of the derivative's Bezier
-// control points (exact upper bound for a cubic).
-export function spanSpeedBound(ext, i) {
-  const p0 = ext[i], p1 = ext[i + 1], p2 = ext[i + 2], p3 = ext[i + 3];
-  const d0 = vscale(vsub(p2, p0), 0.5);
-  const b1 = vadd(p1, vscale(vsub(p2, p0), 1 / 6));
-  const b2 = vsub(p2, vscale(vsub(p3, p1), 1 / 6));
-  const d1 = vscale(vsub(b2, b1), 3);
-  const d2 = vscale(vsub(p3, p1), 0.5);
-  return Math.max(vlen(d0), vlen(d1), vlen(d2));
-}
-
-/**
- * Certify clearance of the spline through `waypoints` against `mesh`.
- * slackBudget: max allowed sampling slack (absolute units). m is chosen per
- * span so that V/(2m) <= slackBudget, and the returned bound subtracts the
- * actual per-span slack.
- */
-export function certify(waypoints, mesh, target, slackBudget) {
-  const ext = buildExt(waypoints);
-  const spans = spanCount(ext);
-  let cert = Infinity, sampledMin = Infinity, total = 0;
-  let worst = null;
-  for (let i = 0; i < spans; i++) {
-    const V = spanSpeedBound(ext, i);
-    const m = Math.max(8, Math.min(4096, Math.ceil(V / (2 * Math.max(slackBudget, 1e-9)))));
-    const slack = V / (2 * m);
-    for (let k = 0; k <= m; k++) {
-      const u = k / m;
-      const p = spanPoint(ext, i, u);
-      const q = clearanceAt(p, mesh);
-      total++;
-      if (q.d < sampledMin) sampledMin = q.d;
-      const lb = q.d - slack;
-      if (lb < cert) { cert = lb; worst = { span: i, u, point: p, nearest: q.point, d: q.d, inside: q.inside, push: q.push, slack }; }
-    }
-  }
-  return {
-    certified: cert, sampledMin, samples: total, spans, worst,
-    target, pass: cert >= target,
-  };
-}
-
 // Dense polyline path: perSpan samples per waypoint span (segment), endpoints
 // included once.
 export function resamplePolyline(waypoints, perSpan = 64) {
@@ -370,42 +301,6 @@ export function waypointPolyline(waypoints, perSpan = 64) {
   return out;
 }
 
-export function samplePolyline(waypoints, perSpan = 64) {
-  const ext = buildExt(waypoints);
-  const spans = spanCount(ext);
-  const out = [];
-  for (let i = 0; i < spans; i++) {
-    const m = i === spans - 1 ? perSpan : perSpan - 1;
-    for (let k = 0; k <= m; k++) out.push(spanPoint(ext, i, k / perSpan));
-  }
-  return out;
-}
-
-export function pathLength(waypoints, perSpan = 64) {
-  const s = samplePolyline(waypoints, perSpan);
-  let L = 0;
-  for (let i = 1; i < s.length; i++) L += vlen(vsub(s[i], s[i - 1]));
-  return L;
-}
-
-// Max and p95 turning angle per unit arc length (curvature proxy). Sharp
-// corners of the raw waypoint polyline score high; a smooth spline scores low.
-export function turningStats(points, perSpan = 64) {
-  const s = points;
-  const turns = [];
-  for (let i = 1; i < s.length - 1; i++) {
-    const a = vsub(s[i], s[i - 1]), b = vsub(s[i + 1], s[i]);
-    const la = vlen(a), lb = vlen(b);
-    if (la < 1e-12 || lb < 1e-12) continue;
-    const c = Math.min(1, Math.max(-1, vdot(a, b) / (la * lb)));
-    const ds = 0.5 * (la + lb);
-    turns.push(Math.acos(c) / Math.max(ds, 1e-12));
-  }
-  if (!turns.length) return { max: 0, p95: 0, n: 0 };
-  turns.sort((x, y) => x - y);
-  return { max: turns[turns.length - 1], p95: turns[Math.floor(0.95 * (turns.length - 1))], n: turns.length };
-}
-
 export function pointToSegment(p, a, b) {
   const ab = vsub(b, a);
   const L2 = vdot(ab, ab);
@@ -413,22 +308,6 @@ export function pointToSegment(p, a, b) {
   let t = vdot(vsub(p, a), ab) / L2;
   t = Math.max(0, Math.min(1, t));
   return vlen(vsub(p, vadd(a, vscale(ab, t))));
-}
-
-// Max distance from dense samples of `a` to the polyline of `b` (both splines).
-export function maxDeviation(a, b, perSpan = 128) {
-  const sa = samplePolyline(a, perSpan);
-  const sb = samplePolyline(b, perSpan);
-  let mx = 0;
-  for (const p of sa) {
-    let best = Infinity;
-    for (let i = 0; i + 1 < sb.length; i++) {
-      const d = pointToSegment(p, sb[i], sb[i + 1]);
-      if (d < best) best = d;
-    }
-    if (best > mx) mx = best;
-  }
-  return mx;
 }
 
 export function boxTriangles(center, size) {
